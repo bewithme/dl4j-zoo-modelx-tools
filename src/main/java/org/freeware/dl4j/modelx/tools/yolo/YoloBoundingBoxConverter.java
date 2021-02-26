@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-public class Yolo2BoundingBoxConverter {
+public class YoloBoundingBoxConverter {
 	
 	
 	public static final String BOX_SIZE="size";
@@ -50,7 +50,7 @@ public class Yolo2BoundingBoxConverter {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<Yolo2BoundingBox> convertAll(String vocAnnotationsPath) throws Exception{
+	public static List<YoloBoundingBox> convertAll(String vocAnnotationsPath) throws Exception{
 		
 		File dir=new File(vocAnnotationsPath);
 		
@@ -60,7 +60,7 @@ public class Yolo2BoundingBoxConverter {
 		}
 	    File[]	fileArray=getSortedFiles(dir);
 	    
-	    List<Yolo2BoundingBox> retList=new ArrayList<Yolo2BoundingBox>(10);
+	    List<YoloBoundingBox> retList=new ArrayList<YoloBoundingBox>(10);
 	    
 	    for(File file:fileArray) {
 	    	
@@ -74,26 +74,26 @@ public class Yolo2BoundingBoxConverter {
 	}
 	
 	
-	 public static Map<String, List<Yolo2BoundingBox> > convertToFileMap( List<Yolo2BoundingBox>  list) throws Exception{
+	 public static Map<String, List<YoloBoundingBox> > convertToFileMap(List<YoloBoundingBox>  list) throws Exception{
 			
-		 Map<String, List<Yolo2BoundingBox> > fileMap=new HashMap<String, List<Yolo2BoundingBox>>();
+		 Map<String, List<YoloBoundingBox> > fileMap=new HashMap<String, List<YoloBoundingBox>>();
 		 
 		 
-		 for(Yolo2BoundingBox yolo2BoundingBox:list) {
+		 for(YoloBoundingBox yoloBoundingBox :list) {
 			 
-			 String fileName=yolo2BoundingBox.getFileName();
+			 String fileName= yoloBoundingBox.getFileName();
 			 
 			 if(fileMap.get(fileName)==null) {
 				 
-				 List<Yolo2BoundingBox> newList=new ArrayList<Yolo2BoundingBox>();
+				 List<YoloBoundingBox> newList=new ArrayList<YoloBoundingBox>();
 				 
-				 newList.add(yolo2BoundingBox);
+				 newList.add(yoloBoundingBox);
 				 
 				 fileMap.put(fileName,newList);
 				 
 			 }else {
 				 
-				 fileMap.get(fileName).add(yolo2BoundingBox);
+				 fileMap.get(fileName).add(yoloBoundingBox);
 			 }
 			
 		 }	
@@ -102,26 +102,26 @@ public class Yolo2BoundingBoxConverter {
 	 }
 	 
 	 
-	 public static Set<String> distinctLabelNames(List<Yolo2BoundingBox>  list) throws Exception{
+	 public static Set<String> distinctLabelNames(List<YoloBoundingBox>  list) throws Exception{
 			
 		 Set<String> labelCounter=new HashSet<String>();
 		 
-		 for(Yolo2BoundingBox yolo2BoundingBox:list) {
+		 for(YoloBoundingBox yoloBoundingBox :list) {
 			 
-			 labelCounter.add(yolo2BoundingBox.getLabel());
+			 labelCounter.add(yoloBoundingBox.getLabel());
 			 
 		 }	
 		   
 		 return labelCounter;
 	 }
 	 
-	 public static void updateLabelIndex(List<Yolo2BoundingBox>  list,Set<String> labelNameSet) throws Exception{
+	 public static void updateLabelIndex(List<YoloBoundingBox>  list, Set<String> labelNameSet) throws Exception{
 			
-		 for(Yolo2BoundingBox yolo2BoundingBox:list) {
+		 for(YoloBoundingBox yoloBoundingBox :list) {
 			
-			 int labelIndex=getLabelIndex(labelNameSet, yolo2BoundingBox.getLabel());
+			 int labelIndex=getLabelIndex(labelNameSet, yoloBoundingBox.getLabel());
 			 
-			 yolo2BoundingBox.setLabelIndex(labelIndex);
+			 yoloBoundingBox.setLabelIndex(labelIndex);
 		 }
 	 }
 	 
@@ -170,7 +170,7 @@ public class Yolo2BoundingBoxConverter {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<Yolo2BoundingBox> convert(File file) throws Exception {
+	public static List<YoloBoundingBox> convert(File file) throws Exception {
 		
 		SAXReader reader = new SAXReader();
 		
@@ -178,7 +178,7 @@ public class Yolo2BoundingBoxConverter {
 		
 		Element root = document.getRootElement();
 		
-		List<Yolo2BoundingBox> boundingBoxList=new ArrayList<Yolo2BoundingBox>(10);
+		List<YoloBoundingBox> boundingBoxList=new ArrayList<YoloBoundingBox>(10);
 		
 		ImageSize imageSize=null;
 		
@@ -210,16 +210,16 @@ public class Yolo2BoundingBoxConverter {
 		    	 
 		    	 boundingBox.setImageSize(imageSize);
 		    	 
-		    	 Yolo2BoundingBox yolo2BoundingBox=convert(boundingBox);
+		    	 YoloBoundingBox yoloBoundingBox =convert(boundingBox);
 		    	 
-		    	 yolo2BoundingBox.setFileName(file.getName());
+		    	 yoloBoundingBox.setFileName(file.getName());
 		    	 
-		    	 yolo2BoundingBox.setBoundingBox(boundingBox);
+		    	 yoloBoundingBox.setBoundingBox(boundingBox);
 		    	 
 		    	 //filter incorrect VocBoundingBox
-		    	 if(yolo2BoundingBox.getH()!=0&&yolo2BoundingBox.getW()!=0) {
+		    	 if(yoloBoundingBox.getH()!=0&& yoloBoundingBox.getW()!=0) {
 		    		 
-		    		 boundingBoxList.add(yolo2BoundingBox);
+		    		 boundingBoxList.add(yoloBoundingBox);
 		    		 
 		    	 }
 		    	
@@ -389,7 +389,7 @@ public class Yolo2BoundingBoxConverter {
 	 * @param boundingBox
 	 * @return
 	 */
-	public static Yolo2BoundingBox convert(VocBoundingBox boundingBox) {
+	public static YoloBoundingBox convert(VocBoundingBox boundingBox) {
 	  
 		ImageSize mageSize=boundingBox.getImageSize();
 		
@@ -405,7 +405,7 @@ public class Yolo2BoundingBoxConverter {
 	    
 		h=h/cellH;
 		
-	    Yolo2BoundingBox bormalizeBoundingBox=new Yolo2BoundingBox();
+	    YoloBoundingBox bormalizeBoundingBox=new YoloBoundingBox();
 	
 	    bormalizeBoundingBox.setW(w);
 	    

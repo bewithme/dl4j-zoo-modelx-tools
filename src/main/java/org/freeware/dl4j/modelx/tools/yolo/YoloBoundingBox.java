@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Yolo2BoundingBox implements Cloneable{
+public class YoloBoundingBox implements Cloneable{
 	
 	private String fileName;
 	

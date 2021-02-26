@@ -42,15 +42,15 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
-public class Yolo2AnchorKmeans {
+public class YoloAnchorKmeans {
 	
 	private int k;
 	
-	private List<Yolo2BoundingBox> yolo2BoundingBoxList ;
+	private List<YoloBoundingBox> yoloBoundingBoxList;
 	
-	private List<Yolo2BoundingBoxCentroid>  boundingBoxCentroidList=new ArrayList<Yolo2BoundingBoxCentroid>(10);
+	private List<YoloBoundingBoxCentroid>  boundingBoxCentroidList=new ArrayList<YoloBoundingBoxCentroid>(10);
 	
-	private List<Yolo2BoundingBox> oldYolo2BoundingBoxList;
+	private List<YoloBoundingBox> oldYoloBoundingBoxList;
 	
 	private Random random=new Random();
 	
@@ -59,11 +59,13 @@ public class Yolo2AnchorKmeans {
 			
 			try {
 				
-				List<Yolo2BoundingBox> yolo2BoundingBoxList = Yolo2BoundingBoxConverter.convertAll("/your voc dataset path/Annotations");
+				List<YoloBoundingBox> yoloBoundingBoxList = YoloBoundingBoxConverter.convertAll("/Users/wenfengxu/Downloads/dataset/people_fall_down/Annotations");
 			
 				Random random=new Random(123456);
-				
-				Yolo2AnchorKmeans yoloAnchorKmeans=new Yolo2AnchorKmeans(yolo2BoundingBoxList,random);
+				//yolo2 k=5  yolo3 k=9
+				int k=9;
+
+				YoloAnchorKmeans yoloAnchorKmeans=new YoloAnchorKmeans(yoloBoundingBoxList,random,k);
 				
 				yoloAnchorKmeans.init();
 				    
@@ -110,7 +112,7 @@ public class Yolo2AnchorKmeans {
 	
 	public void init() {
 		
-		if(yolo2BoundingBoxList==null) {
+		if(yoloBoundingBoxList ==null) {
 			
 			throw new RuntimeException("normalizeBoundingBoxList should not be null !");
 		}
@@ -123,10 +125,10 @@ public class Yolo2AnchorKmeans {
 		while(true) {
 			
 			
-			List<Yolo2BoundingBox> newYolo2BoundingBoxList=cluster(this.yolo2BoundingBoxList, this.boundingBoxCentroidList);
+			List<YoloBoundingBox> newYoloBoundingBoxList =cluster(this.yoloBoundingBoxList, this.boundingBoxCentroidList);
 		
 			
-            List<Yolo2BoundingBoxCentroid>  newBoundingBoxCentroidList=calculateBoundingBoxCentroidList(newYolo2BoundingBoxList);
+            List<YoloBoundingBoxCentroid>  newBoundingBoxCentroidList=calculateBoundingBoxCentroidList(newYoloBoundingBoxList);
 			
 			
 			boolean retVal=compareCentroidList(this.boundingBoxCentroidList, newBoundingBoxCentroidList);
@@ -139,7 +141,7 @@ public class Yolo2AnchorKmeans {
 				return ;
 			}
 			
-			this.oldYolo2BoundingBoxList=newYolo2BoundingBoxList;
+			this.oldYoloBoundingBoxList = newYoloBoundingBoxList;
 			
 			this.boundingBoxCentroidList=newBoundingBoxCentroidList;
 			
@@ -158,20 +160,20 @@ public class Yolo2AnchorKmeans {
      * @param boundingBoxCentroidList
      * @return
      */
-	private List<Yolo2BoundingBoxCentroid> createRandomBoundingBoxCentroidList(int k,List<Yolo2BoundingBoxCentroid> boundingBoxCentroidList) {
+	private List<YoloBoundingBoxCentroid> createRandomBoundingBoxCentroidList(int k, List<YoloBoundingBoxCentroid> boundingBoxCentroidList) {
 		
 		if(k==0) {
 			k=5;
 		}
-		int normalizeBoundingBoxListSize=this.yolo2BoundingBoxList.size();
+		int normalizeBoundingBoxListSize=this.yoloBoundingBoxList.size();
 	
 		for(int i=0;i<k;i++) {
 			
 			int randomNormalizeBoundingBoxIndex=random.nextInt(normalizeBoundingBoxListSize);
 			
-			Yolo2BoundingBox normalizeBoundingBox=this.yolo2BoundingBoxList.get(randomNormalizeBoundingBoxIndex);
+			YoloBoundingBox normalizeBoundingBox=this.yoloBoundingBoxList.get(randomNormalizeBoundingBoxIndex);
 			
-			Yolo2BoundingBoxCentroid boundingBoxCentroid=new Yolo2BoundingBoxCentroid();
+			YoloBoundingBoxCentroid boundingBoxCentroid=new YoloBoundingBoxCentroid();
 			
 			boundingBoxCentroid.setW(normalizeBoundingBox.getW());
 			
@@ -195,11 +197,11 @@ public class Yolo2AnchorKmeans {
 	 * @param boundingBoxCentroidListTarget
 	 * @return
 	 */
-	private Boolean compareCentroidList(List<Yolo2BoundingBoxCentroid>  boundingBoxCentroidList,List<Yolo2BoundingBoxCentroid>  boundingBoxCentroidListTarget) {
+	private Boolean compareCentroidList(List<YoloBoundingBoxCentroid>  boundingBoxCentroidList, List<YoloBoundingBoxCentroid>  boundingBoxCentroidListTarget) {
 	
-		for(Yolo2BoundingBoxCentroid boundingBoxCentroid:boundingBoxCentroidList) {
+		for(YoloBoundingBoxCentroid boundingBoxCentroid:boundingBoxCentroidList) {
 			
-			for(Yolo2BoundingBoxCentroid boundingBoxCentroidTarget:boundingBoxCentroidListTarget) {
+			for(YoloBoundingBoxCentroid boundingBoxCentroidTarget:boundingBoxCentroidListTarget) {
 				
 				if(boundingBoxCentroidTarget.getId().intValue()==boundingBoxCentroid.getId().intValue()) {
 					if((boundingBoxCentroidTarget.getH()!=boundingBoxCentroid.getH())||(boundingBoxCentroidTarget.getW()!=boundingBoxCentroid.getW())) {
@@ -213,18 +215,18 @@ public class Yolo2AnchorKmeans {
 	}
 	
 	
-	private List<Yolo2BoundingBox> cluster(List<Yolo2BoundingBox> yolo2BoundingBoxList,List<Yolo2BoundingBoxCentroid>  boundingBoxCentroidList) {
+	private List<YoloBoundingBox> cluster(List<YoloBoundingBox> yoloBoundingBoxList, List<YoloBoundingBoxCentroid>  boundingBoxCentroidList) {
 	    
-		List<Yolo2BoundingBox> newYolo2BoundingBoxList=new ArrayList<Yolo2BoundingBox>(10);
+		List<YoloBoundingBox> newYoloBoundingBoxList =new ArrayList<YoloBoundingBox>(10);
 		
-		for(Yolo2BoundingBox yolo2BoundingBox:yolo2BoundingBoxList) {
+		for(YoloBoundingBox yoloBoundingBox : yoloBoundingBoxList) {
 			
-			Yolo2BoundingBox newYolo2BoundingBox=cluster(yolo2BoundingBox,boundingBoxCentroidList);
+			YoloBoundingBox newYoloBoundingBox =cluster(yoloBoundingBox,boundingBoxCentroidList);
 			
-			newYolo2BoundingBoxList.add(newYolo2BoundingBox);
+			newYoloBoundingBoxList.add(newYoloBoundingBox);
 			
 		}
-		return newYolo2BoundingBoxList;
+		return newYoloBoundingBoxList;
 	}
 	
 	
@@ -233,18 +235,18 @@ public class Yolo2AnchorKmeans {
 	 * 计算新质心
 	 * @param normalizeBoundingBoxList
 	 */
-	private List<Yolo2BoundingBoxCentroid> calculateBoundingBoxCentroidList(List<Yolo2BoundingBox> normalizeBoundingBoxList) {
+	private List<YoloBoundingBoxCentroid> calculateBoundingBoxCentroidList(List<YoloBoundingBox> normalizeBoundingBoxList) {
 		
-		Map<Integer,List<Yolo2BoundingBox>> clusterMap=new HashMap<Integer,List<Yolo2BoundingBox>>(10);
+		Map<Integer,List<YoloBoundingBox>> clusterMap=new HashMap<Integer,List<YoloBoundingBox>>(10);
 		
-        for(Yolo2BoundingBox normalizeBoundingBox:normalizeBoundingBoxList) {
+        for(YoloBoundingBox normalizeBoundingBox:normalizeBoundingBoxList) {
 			
            	if(clusterMap.get(normalizeBoundingBox.getCentroidId())==null) {
-        		List<Yolo2BoundingBox> list=new ArrayList<Yolo2BoundingBox>(10);
+        		List<YoloBoundingBox> list=new ArrayList<YoloBoundingBox>(10);
         		list.add(normalizeBoundingBox);
         		clusterMap.put(normalizeBoundingBox.getCentroidId(), list);
         	}else {
-        		List<Yolo2BoundingBox> list=clusterMap.get(normalizeBoundingBox.getCentroidId());
+        		List<YoloBoundingBox> list=clusterMap.get(normalizeBoundingBox.getCentroidId());
            		list.add(normalizeBoundingBox);
         		clusterMap.put(normalizeBoundingBox.getCentroidId(), list);
            	}
@@ -253,17 +255,17 @@ public class Yolo2AnchorKmeans {
         
        Set<Integer> clusterIdkeys=clusterMap.keySet();
        
-       List<Yolo2BoundingBoxCentroid>  boundingBoxCentroidList=new ArrayList<Yolo2BoundingBoxCentroid>(10);
+       List<YoloBoundingBoxCentroid>  boundingBoxCentroidList=new ArrayList<YoloBoundingBoxCentroid>(10);
        
        for(Integer clusterIdKey:clusterIdkeys) {
     	   
-    	   List<Yolo2BoundingBox> list=clusterMap.get(clusterIdKey);
+    	   List<YoloBoundingBox> list=clusterMap.get(clusterIdKey);
     	 
     	   double w=0.0d;
     	   
     	   double h=0.0d;
     	   
-    	   for(Yolo2BoundingBox normalizeBoundingBox:list) {
+    	   for(YoloBoundingBox normalizeBoundingBox:list) {
     		   
     		   w=w+normalizeBoundingBox.getW();
     		   
@@ -274,7 +276,7 @@ public class Yolo2AnchorKmeans {
     	   
     	   double newCentroidH=h/list.size();
     	   
-    	   Yolo2BoundingBoxCentroid boundingBoxCentroid=new Yolo2BoundingBoxCentroid(clusterIdKey, newCentroidW, newCentroidH);
+    	   YoloBoundingBoxCentroid boundingBoxCentroid=new YoloBoundingBoxCentroid(clusterIdKey, newCentroidW, newCentroidH);
     	   
     	   boundingBoxCentroidList.add(boundingBoxCentroid);
        }
@@ -287,28 +289,28 @@ public class Yolo2AnchorKmeans {
 	
 	/**
 	 * 聚类
-	 * @param yolo2BoundingBox
+	 * @param yoloBoundingBox
 	 * @param boundingBoxCentroidList
 	 */
-	private Yolo2BoundingBox cluster(Yolo2BoundingBox yolo2BoundingBox,List<Yolo2BoundingBoxCentroid>  boundingBoxCentroidList) {
+	private YoloBoundingBox cluster(YoloBoundingBox yoloBoundingBox, List<YoloBoundingBoxCentroid>  boundingBoxCentroidList) {
 		
-		List<Yolo2BoundingBoxIou> boundingBoxIouList=calculateIOU(yolo2BoundingBox, boundingBoxCentroidList);
+		List<YoloBoundingBoxIou> boundingBoxIouList=calculateIOU(yoloBoundingBox, boundingBoxCentroidList);
 		
 		//最大的Iou即最小的距离 1-iou
-		Yolo2BoundingBoxIou boundingBoxIou=getMaxBoundingBoxIou(boundingBoxIouList);
+		YoloBoundingBoxIou boundingBoxIou=getMaxBoundingBoxIou(boundingBoxIouList);
 		
-		Yolo2BoundingBox newYolo2BoundingBox=null;
+		YoloBoundingBox newYoloBoundingBox =null;
 		
 		try {
-			 newYolo2BoundingBox=(Yolo2BoundingBox)yolo2BoundingBox.clone();
+			 newYoloBoundingBox =(YoloBoundingBox) yoloBoundingBox.clone();
 		} catch (CloneNotSupportedException e) {
 			log.error("error", e);
 		}
 		
 		//将Yolo2BoundingBox归类到与其距离最小的质心
-		newYolo2BoundingBox.setCentroidId(boundingBoxIou.getCentroidId());
+		newYoloBoundingBox.setCentroidId(boundingBoxIou.getCentroidId());
 		
-		return newYolo2BoundingBox;
+		return newYoloBoundingBox;
 		
 	}
 	
@@ -316,17 +318,17 @@ public class Yolo2AnchorKmeans {
 	 * 计算IOU
 	 * 计算时质心中心坐标与边界框中心对齐
 	 * 一共有4种情况
-	 * @param yolo2BoundingBox
+	 * @param yoloBoundingBox
 	 * @param boundingBoxCentroidList
 	 * @return
 	 */
-	private List<Yolo2BoundingBoxIou> calculateIOU(Yolo2BoundingBox yolo2BoundingBox,List<Yolo2BoundingBoxCentroid> boundingBoxCentroidList){
+	private List<YoloBoundingBoxIou> calculateIOU(YoloBoundingBox yoloBoundingBox, List<YoloBoundingBoxCentroid> boundingBoxCentroidList){
 		
 		
-		List<Yolo2BoundingBoxIou> list=new ArrayList<Yolo2BoundingBoxIou>(5);
+		List<YoloBoundingBoxIou> list=new ArrayList<YoloBoundingBoxIou>(5);
 		
 		
-		for(Yolo2BoundingBoxCentroid boundingBoxCentroid:boundingBoxCentroidList) {
+		for(YoloBoundingBoxCentroid boundingBoxCentroid:boundingBoxCentroidList) {
 			
 			double iou=0.0f;
 			
@@ -334,9 +336,9 @@ public class Yolo2AnchorKmeans {
 			
 			double centoridHeight=boundingBoxCentroid.getH();
 			
-			double width=yolo2BoundingBox.getW();
+			double width= yoloBoundingBox.getW();
 			
-			double height=yolo2BoundingBox.getH();
+			double height= yoloBoundingBox.getH();
 			
 			if((centroidWidth>=width)&&(centoridHeight>=height)) {
 				//边界框宽高都比质心小
@@ -355,7 +357,7 @@ public class Yolo2AnchorKmeans {
 				iou=(centroidWidth*centoridHeight)/(width*height);
 			}
 			
-			Yolo2BoundingBoxIou boundingBoxIou=new Yolo2BoundingBoxIou();
+			YoloBoundingBoxIou boundingBoxIou=new YoloBoundingBoxIou();
 			
 			boundingBoxIou.setCentroidId(boundingBoxCentroid.getId());
 			
@@ -372,10 +374,10 @@ public class Yolo2AnchorKmeans {
 	 * @param list
 	 * @return
 	 */
-	private Yolo2BoundingBoxIou getMaxBoundingBoxIou(List<Yolo2BoundingBoxIou> list) {
-		Yolo2BoundingBoxIou maxBoundingBoxIou=new Yolo2BoundingBoxIou();
+	private YoloBoundingBoxIou getMaxBoundingBoxIou(List<YoloBoundingBoxIou> list) {
+		YoloBoundingBoxIou maxBoundingBoxIou=new YoloBoundingBoxIou();
 		maxBoundingBoxIou.setIou(0.00f);
-		for(Yolo2BoundingBoxIou boundingBoxIou:list) {
+		for(YoloBoundingBoxIou boundingBoxIou:list) {
 			if(boundingBoxIou.getIou()>maxBoundingBoxIou.getIou()) {
 				maxBoundingBoxIou=boundingBoxIou;
 			}
@@ -383,31 +385,31 @@ public class Yolo2AnchorKmeans {
 		return maxBoundingBoxIou;
 	}
 
-	public Yolo2AnchorKmeans(int k, List<Yolo2BoundingBox> normalizeBoundingBoxList) {
+	public YoloAnchorKmeans(int k, List<YoloBoundingBox> normalizeBoundingBoxList) {
 		super();
 		this.k = k;
-		this.yolo2BoundingBoxList = normalizeBoundingBoxList;
+		this.yoloBoundingBoxList = normalizeBoundingBoxList;
 	}
 	
-	public Yolo2AnchorKmeans(List<Yolo2BoundingBox> yolo2BoundingBoxList) {
+	public YoloAnchorKmeans(List<YoloBoundingBox> yoloBoundingBoxList) {
 		super();
-		this.yolo2BoundingBoxList = yolo2BoundingBoxList;
+		this.yoloBoundingBoxList = yoloBoundingBoxList;
 	}
 	
-	public Yolo2AnchorKmeans(List<Yolo2BoundingBox> yolo2BoundingBoxList,Random random) {
+	public YoloAnchorKmeans(List<YoloBoundingBox> yoloBoundingBoxList, Random random,int k) {
 		super();
+		this.k=k;
 		this.random=random;
-		this.yolo2BoundingBoxList = yolo2BoundingBoxList;
+		this.yoloBoundingBoxList = yoloBoundingBoxList;
 	}
 	
 	public double[][] getPriorBoxes(){
 		
-		 double[][] priorBoxes={{ 0, 0}, {0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
+		 double[][] priorBoxes=new double[this.k][2];
 		
-		
-		 Collections.sort(boundingBoxCentroidList, new Comparator<Yolo2BoundingBoxCentroid>() {
+		 Collections.sort(boundingBoxCentroidList, new Comparator<YoloBoundingBoxCentroid>() {
 	            @Override
-	            public int compare(Yolo2BoundingBoxCentroid centroid,Yolo2BoundingBoxCentroid targetCentroid) {
+	            public int compare(YoloBoundingBoxCentroid centroid, YoloBoundingBoxCentroid targetCentroid) {
 	            	
 	            	double a=centroid.getH()*centroid.getW();
 	            	
@@ -427,7 +429,7 @@ public class Yolo2AnchorKmeans {
 		
 		for(int i=0;i<boundingBoxCentroidList.size();i++) {
 			
-			Yolo2BoundingBoxCentroid boundingBoxCentroid=boundingBoxCentroidList.get(i);
+			YoloBoundingBoxCentroid boundingBoxCentroid=boundingBoxCentroidList.get(i);
 			
     		priorBoxes[i]=new double[]{boundingBoxCentroid.getW(),boundingBoxCentroid.getH()};
 		}

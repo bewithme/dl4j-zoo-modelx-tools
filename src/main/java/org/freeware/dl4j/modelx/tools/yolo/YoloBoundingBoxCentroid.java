@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Yolo2BoundingBoxCentroid {
+public class YoloBoundingBoxCentroid {
 	
 	
 	private Integer id;

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Yolo2BoundingBoxIou implements Cloneable{
+public class YoloBoundingBoxIou implements Cloneable{
 	
 	private Integer centroidId;
 	

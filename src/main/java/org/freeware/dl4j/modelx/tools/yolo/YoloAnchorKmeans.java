@@ -62,7 +62,7 @@ public class YoloAnchorKmeans {
 				List<YoloBoundingBox> yoloBoundingBoxList = YoloBoundingBoxConverter.convertAll("/Users/wenfengxu/Downloads/dataset/people_fall_down/Annotations");
 			
 				Random random=new Random(123456);
-				//yolo2 k=5  yolo3 k=9
+				//k=5 for yolo2;k=9 from yol3
 				int k=9;
 
 				YoloAnchorKmeans yoloAnchorKmeans=new YoloAnchorKmeans(yoloBoundingBoxList,random,k);
